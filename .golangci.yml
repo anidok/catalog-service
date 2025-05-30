@@ -1,0 +1,14 @@
+linters:
+  disable-all: true
+  enable:
+    - govet
+    - gofmt
+    - unused
+    - ineffassign 
+
+issues:
+  exclude-dirs:
+    - vendor
+    - migrations
+  exclude-files:
+    - .*_test\.go
