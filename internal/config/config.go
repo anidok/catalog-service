@@ -6,6 +6,7 @@ import (
 
 type AppConfig struct {
 	BaseConfig
+	openSearchConfig *OpenSearchConfig
 }
 
 var cfg *AppConfig
@@ -17,6 +18,7 @@ func Load() *AppConfig {
 	viper.GetViper().AddConfigPath("../../../../")
 	base.LoadWithOptions(map[string]interface{}{})
 	cfg = base
+	cfg.openSearchConfig = NewOpenSearchConfig(cfg)
 	return base
 }
 
@@ -26,4 +28,16 @@ func Get() *AppConfig {
 
 func AppName() string {
 	return cfg.GetOptionalValue("APP_NAME", "catalog-service")
+}
+
+func LogLevel() string {
+	return cfg.GetOptionalValue("LOG_LEVEL", "debug")
+}
+
+func LogFormat() string {
+	return cfg.GetOptionalValue("LOG_FORMAT", "json")
+}
+
+func OpenSearch() *OpenSearchConfig {
+	return cfg.openSearchConfig
 }

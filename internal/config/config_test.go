@@ -17,3 +17,8 @@ func TestLoadAndGet(t *testing.T) {
 	assert.Equal(t, 0, cfg.GetOptionalIntValue("SOME_OTHER_INT_KEY", 0))
 	os.Unsetenv("SOME_ENV_KEY")
 }
+
+func TestShouldGetOpenSearchConfig(t *testing.T) {
+	c := Load()
+	assert.Equal(t, NewOpenSearchConfig(c), OpenSearch())
+}
