@@ -2,10 +2,12 @@ package opensearch
 
 import (
 	"bytes"
+	"catalog-service/internal/config"
 	"catalog-service/internal/logger"
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 
 	"github.com/opensearch-project/opensearch-go/v2"
@@ -23,8 +25,20 @@ type ClientImpl struct {
 }
 
 func NewClient(addresses []string) (*ClientImpl, error) {
+	osCfg := config.OpenSearch()
+	transport := &http.Transport{
+		MaxIdleConns:        osCfg.MaxIdleConns(),
+		MaxIdleConnsPerHost: osCfg.MaxIdleConnsPerHost(),
+		IdleConnTimeout:     osCfg.IdleConnTimeout(),
+		DialContext: (&net.Dialer{
+			Timeout:   osCfg.DialTimeout(),
+			KeepAlive: osCfg.KeepAlive(),
+		}).DialContext,
+		TLSHandshakeTimeout: osCfg.TLSHandshakeTimeout(),
+	}
 	client, err := opensearch.NewClient(opensearch.Config{
-		Addresses: addresses,
+		Addresses: osCfg.Host(),
+		Transport: transport,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create OpenSearch client: %w", err)

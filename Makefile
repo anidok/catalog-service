@@ -1,13 +1,22 @@
 .PHONY: all
 
 SRC_PKGS=$(shell go list ./... | grep -v "vendor")
-UNIT_TEST_PACKAGES=$(shell go list ./... | grep -vE 'mocks')
+UNIT_TEST_PACKAGES=$(shell go list ./... | grep -vE 'mocks|integration')
+INTEGRATION_TEST_PACKAGES=$(shell go list ./... | grep 'integration')
 
 fmt:
 	go fmt $(SRC_PKGS)
 
-test: 
+.PHONY: unit-test
+unit-test: 
 	go test ${UNIT_TEST_PACKAGES}
+
+.PHONY: integration-test
+integration-test: 
+	go test -p 1 ${INTEGRATION_TEST_PACKAGES}
+
+.PHONY: integration-test
+test: unit-test integration-test
 
 lint:
 	golangci-lint cache clean
@@ -30,4 +39,4 @@ ingest:
 	go run cmd/ingest/main.go
 
 migrate-ingest: migrate ingest
-all: fmt test lint setup-tools generate-mocks migrate-ingest
+

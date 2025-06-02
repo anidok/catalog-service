@@ -70,7 +70,7 @@ func (m *Migrate) createOrUpdateIndex(indexName string, schema []byte) error {
 }
 
 func (m *Migrate) indexExists(indexName string) (bool, error) {
-	timeout := time.Duration(config.OpenSearch().Timeout()) * time.Millisecond
+	timeout := time.Duration(config.OpenSearch().DialTimeout()) * time.Millisecond
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	req := opensearchapi.IndicesExistsRequest{
@@ -91,7 +91,7 @@ func (m *Migrate) createIndex(indexName string, schema []byte) error {
 		return fmt.Errorf("invalid json schema for index %s: %w", indexName, err)
 	}
 
-	timeout := time.Duration(config.OpenSearch().Timeout()) * time.Millisecond
+	timeout := time.Duration(config.OpenSearch().DialTimeout()) * time.Millisecond
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
