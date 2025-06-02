@@ -117,6 +117,24 @@ func (_m *ServiceRepository) Search(ctx context.Context, query string, page int,
 	return r0, r1, r2
 }
 
+// Update provides a mock function with given fields: ctx, service
+func (_m *ServiceRepository) Update(ctx context.Context, service *models.Service) error {
+	ret := _m.Called(ctx, service)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Update")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *models.Service) error); ok {
+		r0 = rf(ctx, service)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // NewServiceRepository creates a new instance of ServiceRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewServiceRepository(t interface {

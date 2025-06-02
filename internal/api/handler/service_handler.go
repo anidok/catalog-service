@@ -164,6 +164,58 @@ func (h *ServiceHandler) Delete(c *gin.Context) {
 	})
 }
 
+func (h *ServiceHandler) Update(c *gin.Context) {
+	ctx := c.Request.Context()
+	id := c.Param("id")
+	log := logger.NewContextLogger(ctx, "ServiceHandler/Update")
+	log.Infof("updating service by id='%s'", id)
+
+	if errs, httpCode := validator.ValidateID(id); len(errs) > 0 {
+		c.JSON(httpCode, dto.ServiceDetailResponse{
+			Success: false,
+			Errors:  errs,
+		})
+		return
+	}
+
+	var req dto.ServiceDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Errorf(err, "invalid request body")
+		c.JSON(http.StatusBadRequest, dto.ServiceDetailResponse{
+			Success: false,
+			Errors: []dto.ErrorObj{{
+				Code:   constants.Error_MALFORMED_DATA,
+				Entity: "service",
+				Cause:  "invalid request body",
+			}},
+		})
+		return
+	}
+
+	if errs, httpCode := validator.ValidateUpdateRequest(&req); len(errs) > 0 {
+		c.JSON(httpCode, dto.ServiceDetailResponse{
+			Success: false,
+			Errors:  errs,
+		})
+		return
+	}
+
+	service, err := h.usecase.Update(ctx, id, &req)
+	if err != nil {
+		log.Errorf(err, "failed to update service")
+		buildErrorDetailResponse(c, http.StatusNotFound, []dto.ErrorObj{
+			{
+				Code:   constants.Error_SERVICE_NOT_FOUND,
+				Entity: "service",
+				Cause:  "service not found",
+			},
+		})
+		return
+	}
+
+	buildSuccessDetailResponse(c, service)
+}
+
 func buildSuccessListResponse(c *gin.Context, services []*dto.ServiceDTO, total int, query string, page, limit int) {
 	c.JSON(http.StatusOK, dto.ServiceListResponse{
 		Success: true,

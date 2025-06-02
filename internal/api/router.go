@@ -34,7 +34,8 @@ func NewRouter(repo repository.ServiceRepository) *gin.Engine {
 		api.GET("/services", serviceHandler.Search)
 		api.GET("/services/:id", serviceHandler.GetByID)
 		api.POST("/services", serviceHandler.Create)
-		api.DELETE("/services/:id", serviceHandler.Delete) // <-- Add delete endpoint
+		api.DELETE("/services/:id", serviceHandler.Delete)
+		api.PUT("/services/:id", serviceHandler.Update)
 	}
 
 	return r

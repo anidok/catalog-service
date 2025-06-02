@@ -91,6 +91,11 @@ func (r *ServiceRepositoryImpl) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
+func (r *ServiceRepositoryImpl) Update(ctx context.Context, service *models.Service) error {
+	service.UpdatedAt = time.Now().UTC()
+	return r.IndexDocument(ctx, service.ID, service, ServiceIndexName)
+}
+
 func (r *ServiceRepositoryImpl) prepareService(service *models.Service) error {
 	if service == nil {
 		return fmt.Errorf("service cannot be nil")

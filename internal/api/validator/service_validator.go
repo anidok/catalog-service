@@ -92,3 +92,34 @@ func ValidateCreateRequest(req *dto.ServiceDTO) ([]dto.ErrorObj, int) {
 	}
 	return nil, http.StatusOK
 }
+
+func ValidateUpdateRequest(req *dto.ServiceDTO) ([]dto.ErrorObj, int) {
+	var errs []dto.ErrorObj
+	if req.Name != "" {
+		errs = append(errs, dto.ErrorObj{
+			Code:   constants.Error_MALFORMED_DATA,
+			Entity: "name",
+			Cause:  "name cannot be updated",
+		})
+	}
+	if req.Description != "" && len(req.Description) == 0 {
+		errs = append(errs, dto.ErrorObj{
+			Code:   constants.Error_MALFORMED_DATA,
+			Entity: "description",
+			Cause:  "description cannot be empty",
+		})
+	}
+	for i, v := range req.Versions {
+		if v.VersionNumber == "" {
+			errs = append(errs, dto.ErrorObj{
+				Code:   constants.Error_MALFORMED_DATA,
+				Entity: "versions",
+				Cause:  "version_number is required for version at index " + strconv.Itoa(i),
+			})
+		}
+	}
+	if len(errs) > 0 {
+		return errs, http.StatusBadRequest
+	}
+	return nil, http.StatusOK
+}

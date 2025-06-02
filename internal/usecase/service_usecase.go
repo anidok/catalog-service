@@ -13,6 +13,7 @@ type ServiceUsecase interface {
 	FindByID(ctx context.Context, id string) (*dto.ServiceDTO, error)
 	Create(ctx context.Context, req *dto.ServiceDTO) (*dto.ServiceDTO, error)
 	Delete(ctx context.Context, id string) error
+	Update(ctx context.Context, id string, req *dto.ServiceDTO) (*dto.ServiceDTO, error)
 }
 
 type serviceUsecase struct {
@@ -79,4 +80,28 @@ func (u *serviceUsecase) Create(ctx context.Context, req *dto.ServiceDTO) (*dto.
 
 func (u *serviceUsecase) Delete(ctx context.Context, id string) error {
 	return u.repo.Delete(ctx, id)
+}
+
+func (u *serviceUsecase) Update(ctx context.Context, id string, req *dto.ServiceDTO) (*dto.ServiceDTO, error) {
+	svc, err := u.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if req.Description != "" {
+		svc.Description = req.Description
+	}
+	if len(req.Versions) > 0 {
+		svc.Versions = append(svc.Versions, req.Versions...)
+	}
+	if err := u.repo.Update(ctx, svc); err != nil {
+		return nil, err
+	}
+	return &dto.ServiceDTO{
+		ID:          svc.ID,
+		Name:        svc.Name,
+		Description: svc.Description,
+		Versions:    svc.Versions,
+		CreatedAt:   svc.CreatedAt.Format(constants.Iso8601Format),
+		UpdatedAt:   svc.UpdatedAt.Format(constants.Iso8601Format),
+	}, nil
 }

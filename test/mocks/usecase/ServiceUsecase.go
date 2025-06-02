@@ -129,6 +129,36 @@ func (_m *ServiceUsecase) Search(ctx context.Context, query string, page int, li
 	return r0, r1, r2
 }
 
+// Update provides a mock function with given fields: ctx, id, req
+func (_m *ServiceUsecase) Update(ctx context.Context, id string, req *dto.ServiceDTO) (*dto.ServiceDTO, error) {
+	ret := _m.Called(ctx, id, req)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Update")
+	}
+
+	var r0 *dto.ServiceDTO
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *dto.ServiceDTO) (*dto.ServiceDTO, error)); ok {
+		return rf(ctx, id, req)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, *dto.ServiceDTO) *dto.ServiceDTO); ok {
+		r0 = rf(ctx, id, req)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*dto.ServiceDTO)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, *dto.ServiceDTO) error); ok {
+		r1 = rf(ctx, id, req)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewServiceUsecase creates a new instance of ServiceUsecase. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewServiceUsecase(t interface {
