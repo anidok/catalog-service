@@ -19,6 +19,8 @@ setup-tools:
 
 generate-mocks:
 	mockery --name=Client --dir=internal/opensearch --output=test/mocks/opensearch --outpkg=opensearch
+	mockery --name=ServiceRepository --dir=internal/repository --output=test/mocks/repository --outpkg=repository
+	mockery --name=ServiceUsecase --dir=internal/usecase --output=test/mocks/usecase --outpkg=usecase
 
 migrate:
 	curl -X DELETE "http://localhost:9200/services"

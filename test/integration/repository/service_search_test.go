@@ -1,10 +1,7 @@
 package repository_test
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"path/filepath"
 	"testing"
 
 	"catalog-service/internal/config"
@@ -12,17 +9,12 @@ import (
 	"catalog-service/internal/models"
 	"catalog-service/internal/opensearch"
 	"catalog-service/internal/repository"
+	testconstants "catalog-service/test/constants"
 	"catalog-service/test/utils"
-
-	"runtime"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-
-	"github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 )
-
-const ServiceIndexName = "services"
 
 type ServiceRepoSearchIntegrationSuite struct {
 	suite.Suite
@@ -35,19 +27,18 @@ func TestServiceRepoSearchIntegrationSuite(t *testing.T) {
 }
 
 func (suite *ServiceRepoSearchIntegrationSuite) SetupSuite() {
-	suite.T().Parallel()
 	config.Load()
 	logger.Setup("INFO", "json")
 	client, err := opensearch.NewClient(config.OpenSearch().Host())
 	suite.Require().NoError(err)
 	suite.client = client
-	suite.cleanupTestData()
 	suite.repo = repository.ServiceRepositoryImpl{Client: client}
-	suite.loadTestData()
+	utils.CleanupTestData(suite.client, testconstants.ServiceIndexName, suite.T())
+	utils.LoadTestData(suite.repo, suite.T())
 }
 
 func (suite *ServiceRepoSearchIntegrationSuite) TearDownSuite() {
-	suite.cleanupTestData()
+	utils.CleanupTestData(suite.client, testconstants.ServiceIndexName, suite.T())
 }
 
 func (suite *ServiceRepoSearchIntegrationSuite) Test_Search_Pagination() {
@@ -154,41 +145,6 @@ func (suite *ServiceRepoSearchIntegrationSuite) Test_Search_Error_InvalidPageLim
 	assert.Error(suite.T(), err)
 	assert.Nil(suite.T(), services)
 	assert.Equal(suite.T(), 0, total)
-}
-
-func (suite *ServiceRepoSearchIntegrationSuite) loadTestData() {
-	ctx := context.Background()
-	_, filename, _, _ := runtime.Caller(0)
-	testdataPath := filepath.Join(filepath.Dir(filename), "..", "testdata", "services.json")
-
-	services, err := utils.UnmarshalServiceList(testdataPath)
-	suite.Require().NoError(err)
-
-	for _, svc := range services {
-		err := suite.repo.Create(ctx, svc)
-		suite.Require().NoError(err)
-	}
-}
-
-func (suite *ServiceRepoSearchIntegrationSuite) cleanupTestData() {
-	ctx := context.Background()
-	deleteByQuery := map[string]interface{}{
-		"query": map[string]interface{}{
-			"match_all": map[string]interface{}{},
-		},
-	}
-	body, _ := json.Marshal(deleteByQuery)
-	req := opensearchapi.DeleteByQueryRequest{
-		Index: []string{ServiceIndexName},
-		Body:  bytes.NewReader(body),
-	}
-
-	res, err := req.Do(ctx, suite.client)
-	if err != nil {
-		suite.T().Logf("Cleanup delete by query failed: %v", err)
-		return
-	}
-	defer res.Body.Close()
 }
 
 func (suite *ServiceRepoSearchIntegrationSuite) buildService(name, desc string, version string) models.Service {
