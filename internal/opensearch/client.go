@@ -19,6 +19,7 @@ type Client interface {
 	IndexDocument(ctx context.Context, id string, document interface{}, indexName string) error
 	Search(ctx context.Context, indexName string, searchBody map[string]interface{}) ([]map[string]interface{}, int, error)
 	FindDocumentByID(ctx context.Context, indexName, id string) (map[string]interface{}, error)
+	DeleteDocumentByID(ctx context.Context, indexName, id string) error
 }
 
 type ClientImpl struct {
@@ -175,4 +176,23 @@ func (c *ClientImpl) FindDocumentByID(ctx context.Context, indexName, id string)
 		return nil, fmt.Errorf("document not found")
 	}
 	return getResp.Source, nil
+}
+
+func (c *ClientImpl) DeleteDocumentByID(ctx context.Context, indexName, id string) error {
+	log := logger.NewContextLogger(ctx, "Client/DeleteDocumentByID")
+	req := opensearchapi.DeleteRequest{
+		Index:      indexName,
+		DocumentID: id,
+		Refresh:    "true",
+	}
+	log.Debugf("deleting document by id: %s from index: %s", id, indexName)
+	res, err := req.Do(ctx, c.Client)
+	if err != nil {
+		return fmt.Errorf("failed to delete document by id: %w", err)
+	}
+	defer res.Body.Close()
+	if res.IsError() {
+		return fmt.Errorf("error deleting document by id: %s", res.String())
+	}
+	return nil
 }

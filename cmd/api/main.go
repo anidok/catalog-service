@@ -1,12 +1,12 @@
 package main
 
 import (
-	"context"
 	"catalog-service/internal/api"
 	"catalog-service/internal/config"
 	"catalog-service/internal/logger"
 	"catalog-service/internal/opensearch"
 	"catalog-service/internal/repository"
+	"context"
 	"net/http"
 	"os"
 	"os/signal"

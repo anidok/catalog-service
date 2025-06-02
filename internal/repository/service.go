@@ -81,6 +81,16 @@ func (r *ServiceRepositoryImpl) FindByID(ctx context.Context, id string) (*model
 	return &svc, nil
 }
 
+func (r *ServiceRepositoryImpl) Delete(ctx context.Context, id string) error {
+	log := logger.NewContextLogger(ctx, "ServiceRepositoryImpl/Delete")
+	err := r.Client.DeleteDocumentByID(ctx, ServiceIndexName, id)
+	if err != nil {
+		log.Errorf(err, "failed to delete document")
+		return err
+	}
+	return nil
+}
+
 func (r *ServiceRepositoryImpl) prepareService(service *models.Service) error {
 	if service == nil {
 		return fmt.Errorf("service cannot be nil")

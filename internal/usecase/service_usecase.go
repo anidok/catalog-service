@@ -12,6 +12,7 @@ type ServiceUsecase interface {
 	Search(ctx context.Context, query string, page, limit int) ([]*dto.ServiceDTO, int, error)
 	FindByID(ctx context.Context, id string) (*dto.ServiceDTO, error)
 	Create(ctx context.Context, req *dto.ServiceDTO) (*dto.ServiceDTO, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type serviceUsecase struct {
@@ -74,4 +75,8 @@ func (u *serviceUsecase) Create(ctx context.Context, req *dto.ServiceDTO) (*dto.
 		CreatedAt:   svc.CreatedAt.Format(constants.Iso8601Format),
 		UpdatedAt:   svc.UpdatedAt.Format(constants.Iso8601Format),
 	}, nil
+}
+
+func (u *serviceUsecase) Delete(ctx context.Context, id string) error {
+	return u.repo.Delete(ctx, id)
 }

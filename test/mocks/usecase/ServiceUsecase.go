@@ -14,6 +14,84 @@ type ServiceUsecase struct {
 	mock.Mock
 }
 
+// Create provides a mock function with given fields: ctx, req
+func (_m *ServiceUsecase) Create(ctx context.Context, req *dto.ServiceDTO) (*dto.ServiceDTO, error) {
+	ret := _m.Called(ctx, req)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Create")
+	}
+
+	var r0 *dto.ServiceDTO
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *dto.ServiceDTO) (*dto.ServiceDTO, error)); ok {
+		return rf(ctx, req)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *dto.ServiceDTO) *dto.ServiceDTO); ok {
+		r0 = rf(ctx, req)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*dto.ServiceDTO)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *dto.ServiceDTO) error); ok {
+		r1 = rf(ctx, req)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Delete provides a mock function with given fields: ctx, id
+func (_m *ServiceUsecase) Delete(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Delete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// FindByID provides a mock function with given fields: ctx, id
+func (_m *ServiceUsecase) FindByID(ctx context.Context, id string) (*dto.ServiceDTO, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindByID")
+	}
+
+	var r0 *dto.ServiceDTO
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*dto.ServiceDTO, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *dto.ServiceDTO); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*dto.ServiceDTO)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Search provides a mock function with given fields: ctx, query, page, limit
 func (_m *ServiceUsecase) Search(ctx context.Context, query string, page int, limit int) ([]*dto.ServiceDTO, int, error) {
 	ret := _m.Called(ctx, query, page, limit)

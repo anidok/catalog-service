@@ -145,3 +145,23 @@ func (suite *ClientTestSuite) Test_FindDocumentByID_NotFound() {
 	_, err := client.FindDocumentByID(ctx, TestIndexName, "not-exist-id")
 	assert.Error(suite.T(), err)
 }
+
+func (suite *ClientTestSuite) Test_DeleteDocumentByID_Success() {
+	body := `{
+		"result": "deleted"
+	}`
+	client := newMockClient(unmarshalJSON(body), http.StatusOK)
+	ctx := context.Background()
+	err := client.DeleteDocumentByID(ctx, TestIndexName, "delete-id")
+	assert.NoError(suite.T(), err)
+}
+
+func (suite *ClientTestSuite) Test_DeleteDocumentByID_NotFound() {
+	body := `{
+		"error": "not found"
+	}`
+	client := newMockClient(unmarshalJSON(body), http.StatusNotFound)
+	ctx := context.Background()
+	err := client.DeleteDocumentByID(ctx, TestIndexName, "not-exist-id")
+	assert.Error(suite.T(), err)
+}

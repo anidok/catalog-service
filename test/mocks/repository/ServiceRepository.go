@@ -32,6 +32,24 @@ func (_m *ServiceRepository) Create(ctx context.Context, service *models.Service
 	return r0
 }
 
+// Delete provides a mock function with given fields: ctx, id
+func (_m *ServiceRepository) Delete(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Delete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // FindByID provides a mock function with given fields: ctx, id
 func (_m *ServiceRepository) FindByID(ctx context.Context, id string) (*models.Service, error) {
 	ret := _m.Called(ctx, id)

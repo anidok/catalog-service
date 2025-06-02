@@ -133,6 +133,37 @@ func (h *ServiceHandler) Create(c *gin.Context) {
 	})
 }
 
+func (h *ServiceHandler) Delete(c *gin.Context) {
+	ctx := c.Request.Context()
+	id := c.Param("id")
+	log := logger.NewContextLogger(ctx, "ServiceHandler/Delete")
+	log.Infof("deleting service by id='%s'", id)
+
+	if errs, httpCode := validator.ValidateID(id); len(errs) > 0 {
+		c.JSON(httpCode, dto.ServiceDetailResponse{
+			Success: false,
+			Errors:  errs,
+		})
+		return
+	}
+
+	err := h.usecase.Delete(ctx, id)
+	if err != nil {
+		buildErrorDetailResponse(c, http.StatusNotFound, []dto.ErrorObj{
+			{
+				Code:   constants.Error_SERVICE_NOT_FOUND,
+				Entity: "service",
+				Cause:  "service not found",
+			},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.ServiceDetailResponse{
+		Success: true,
+	})
+}
+
 func buildSuccessListResponse(c *gin.Context, services []*dto.ServiceDTO, total int, query string, page, limit int) {
 	c.JSON(http.StatusOK, dto.ServiceListResponse{
 		Success: true,
