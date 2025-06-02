@@ -34,3 +34,9 @@ func newMockClient(respBody map[string]interface{}, statusCode int) *Client {
 	})
 	return &Client{client: osClient}
 }
+
+func unmarshalJSON(jsonStr string) map[string]interface{} {
+	var result map[string]interface{}
+	_ = json.Unmarshal([]byte(jsonStr), &result)
+	return result
+}
