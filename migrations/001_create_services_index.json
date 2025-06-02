@@ -1,0 +1,33 @@
+{
+  "settings": {
+    "number_of_shards": 3,
+    "number_of_replicas": 3
+  },
+  "mappings": {
+    "properties": {
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "description": {
+        "type": "text"
+      },
+      "versions": {
+        "type": "nested",
+        "properties": {
+          "version_number": {
+            "type": "keyword"
+          },
+          "details": {
+            "type": "text"
+          }
+        }
+      }
+    }
+  }
+} 

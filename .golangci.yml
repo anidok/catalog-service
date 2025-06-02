@@ -5,10 +5,12 @@ linters:
     - gofmt
     - unused
     - ineffassign 
+    - staticcheck
 
 issues:
   exclude-dirs:
     - vendor
     - migrations
+    - migrate
   exclude-files:
     - .*_test\.go
