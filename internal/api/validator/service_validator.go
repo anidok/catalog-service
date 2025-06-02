@@ -1,11 +1,10 @@
 package validator
 
 import (
-	"net/http"
-	"strconv"
-
 	"catalog-service/internal/constants"
 	"catalog-service/internal/dto"
+	"net/http"
+	"strconv"
 )
 
 func ValidateSearchRequest(pageStr, limitStr string) (page int, limit int, errs []dto.ErrorObj, httpCode int) {
@@ -49,4 +48,15 @@ func ValidateLimitWithError(limitStr string) (int, *dto.ErrorObj, int) {
 		}, http.StatusBadRequest
 	}
 	return limit, nil, http.StatusOK
+}
+
+func ValidateID(id string) ([]dto.ErrorObj, int) {
+	if id == "" {
+		return []dto.ErrorObj{{
+			Code:   constants.Error_MALFORMED_DATA,
+			Entity: "id",
+			Cause:  "missing id",
+		}}, http.StatusBadRequest
+	}
+	return nil, http.StatusOK
 }

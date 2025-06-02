@@ -38,5 +38,8 @@ migrate:
 ingest:
 	go run cmd/ingest/main.go
 
-migrate-ingest: migrate ingest
+prepare: migrate ingest
+
+run-api:
+	go run cmd/api/main.go
 

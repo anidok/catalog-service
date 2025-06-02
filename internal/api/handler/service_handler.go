@@ -38,14 +38,14 @@ func (h *ServiceHandler) Search(c *gin.Context) {
 
 	page, limit, errs, httpCode := validator.ValidateSearchRequest(pageStr, limitStr)
 	if len(errs) > 0 {
-		buildErrorResponse(c, httpCode, errs)
+		buildErrorListResponse(c, httpCode, errs)
 		return
 	}
 
 	services, total, err := h.usecase.Search(ctx, query, page, limit)
 	if err != nil {
 		log.Errorf(err, "failed to search services")
-		buildErrorResponse(c, http.StatusInternalServerError, []dto.ErrorObj{
+		buildErrorListResponse(c, http.StatusInternalServerError, []dto.ErrorObj{
 			{
 				Code:   constants.Error_GENERIC_SERVICE_ERROR,
 				Entity: "service",
@@ -55,11 +55,41 @@ func (h *ServiceHandler) Search(c *gin.Context) {
 		return
 	}
 
-	buildSuccessResponse(c, services, total, query, page, limit)
+	buildSuccessListResponse(c, services, total, query, page, limit)
 }
 
-func buildSuccessResponse(c *gin.Context, services []*dto.ServiceDTO, total int, query string, page, limit int) {
+func (h *ServiceHandler) GetByID(c *gin.Context) {
+	ctx := c.Request.Context()
+	id := c.Param("id")
+	log := logger.NewContextLogger(ctx, "ServiceHandler/GetByID")
+	log.Infof("fetching service by id='%s'", id)
+
+	if errs, httpCode := validator.ValidateID(id); len(errs) > 0 {
+		c.JSON(httpCode, dto.ServiceDetailResponse{
+			Success: false,
+			Errors:  errs,
+		})
+		return
+	}
+
+	service, err := h.usecase.FindByID(ctx, id)
+	if err != nil {
+		buildErrorDetailResponse(c, http.StatusNotFound, []dto.ErrorObj{
+			{
+				Code:   constants.Error_SERVICE_NOT_FOUND,
+				Entity: "service",
+				Cause:  "service not found",
+			},
+		})
+		return
+	}
+
+	buildSuccessDetailResponse(c, service)
+}
+
+func buildSuccessListResponse(c *gin.Context, services []*dto.ServiceDTO, total int, query string, page, limit int) {
 	c.JSON(http.StatusOK, dto.ServiceListResponse{
+		Success: true,
 		Data: &dto.ServiceListData{
 			Count:    total,
 			Services: services,
@@ -68,8 +98,21 @@ func buildSuccessResponse(c *gin.Context, services []*dto.ServiceDTO, total int,
 	})
 }
 
-func buildErrorResponse(c *gin.Context, httpCode int, errs []dto.ErrorObj) {
+func buildSuccessDetailResponse(c *gin.Context, service *dto.ServiceDTO) {
+	c.JSON(http.StatusOK, dto.ServiceDetailResponse{
+		Success: true,
+		Data:    service,
+	})
+}
+
+func buildErrorListResponse(c *gin.Context, httpCode int, errs []dto.ErrorObj) {
 	c.JSON(httpCode, dto.ServiceListResponse{
+		Errors: errs,
+	})
+}
+
+func buildErrorDetailResponse(c *gin.Context, httpCode int, errs []dto.ErrorObj) {
+	c.JSON(httpCode, dto.ServiceDetailResponse{
 		Errors: errs,
 	})
 }

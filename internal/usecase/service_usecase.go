@@ -9,6 +9,7 @@ import (
 
 type ServiceUsecase interface {
 	Search(ctx context.Context, query string, page, limit int) ([]*dto.ServiceDTO, int, error)
+	FindByID(ctx context.Context, id string) (*dto.ServiceDTO, error)
 }
 
 type serviceUsecase struct {
@@ -36,4 +37,19 @@ func (u *serviceUsecase) Search(ctx context.Context, query string, page, limit i
 		})
 	}
 	return dtos, total, nil
+}
+
+func (u *serviceUsecase) FindByID(ctx context.Context, id string) (*dto.ServiceDTO, error) {
+	svc, err := u.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return &dto.ServiceDTO{
+		ID:          svc.ID,
+		Name:        svc.Name,
+		Description: svc.Description,
+		Versions:    svc.Versions,
+		CreatedAt:   svc.CreatedAt.Format(constants.Iso8601Format),
+		UpdatedAt:   svc.UpdatedAt.Format(constants.Iso8601Format),
+	}, nil
 }

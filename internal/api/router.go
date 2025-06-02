@@ -27,11 +27,12 @@ func NewRouter(repo repository.ServiceRepository) *gin.Engine {
 	r.Use(middleware.CorrelationIDMiddleware())
 
 	serviceUsecase := usecase.NewServiceUsecase(repo)
-	searchHandler := handler.NewServiceHandler(serviceUsecase)
+	serviceHandler := handler.NewServiceHandler(serviceUsecase)
 
 	api := r.Group("/api")
 	{
-		api.GET("/services", searchHandler.Search)
+		api.GET("/services", serviceHandler.Search)
+		api.GET("/services/:id", serviceHandler.GetByID)
 	}
 
 	return r

@@ -7,6 +7,13 @@ type ErrorObj struct {
 }
 
 type ServiceListResponse struct {
-	Data   *ServiceListData `json:"data,omitempty"`
-	Errors []ErrorObj       `json:"errors,omitempty"`
+	Success bool             `json:"success"`
+	Data    *ServiceListData `json:"data,omitempty"`
+	Errors  []ErrorObj       `json:"errors,omitempty"`
+}
+
+type ServiceDetailResponse struct {
+	Success bool        `json:"success"`
+	Data    *ServiceDTO `json:"data,omitempty"`
+	Errors  []ErrorObj  `json:"errors,omitempty"`
 }

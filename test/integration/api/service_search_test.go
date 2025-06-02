@@ -61,6 +61,7 @@ func (s *ServiceAPISearchIntegrationSuite) Test_SearchAPI_EmptyQuery_DefaultPagi
 	var result dto.ServiceListResponse
 	s.decodeResponse(resp.Body, &result)
 
+	assert.True(s.T(), result.Success)
 	assert.GreaterOrEqual(s.T(), result.Data.Count, 5)
 	assert.Equal(s.T(), 10, len(result.Data.Services))
 	assert.Nil(s.T(), result.Errors)
@@ -75,6 +76,7 @@ func (s *ServiceAPISearchIntegrationSuite) Test_SearchAPI_QueryPhrase() {
 	var result dto.ServiceListResponse
 	s.decodeResponse(resp.Body, &result)
 
+	assert.True(s.T(), result.Success)
 	assert.Equal(s.T(), 1, result.Data.Count)
 	assert.Len(s.T(), result.Data.Services, 1)
 	assert.Equal(s.T(), "Forex Card", result.Data.Services[0].Name)
@@ -91,11 +93,47 @@ func (s *ServiceAPISearchIntegrationSuite) Test_SearchAPI_InvalidPage() {
 	var result dto.ServiceListResponse
 	s.decodeResponse(resp.Body, &result)
 
+	assert.False(s.T(), result.Success)
 	assert.Nil(s.T(), result.Data)
 	assert.NotEmpty(s.T(), result.Errors)
 	assert.Equal(s.T(), "page", result.Errors[0].Entity)
 	assert.Equal(s.T(), "invalid page", result.Errors[0].Cause)
 	assert.Equal(s.T(), "101", result.Errors[0].Code)
+}
+
+func (suite *ServiceAPISearchIntegrationSuite) Test_GetServiceByID_Success() {
+	listResp := suite.doGet("/api/services", nil)
+	defer listResp.Body.Close()
+	var listResult struct {
+		Data struct {
+			Services []struct {
+				ID string `json:"id"`
+			} `json:"services"`
+		} `json:"data"`
+	}
+	suite.decodeResponse(listResp.Body, &listResult)
+	svcID := listResult.Data.Services[0].ID
+
+	detailResp := suite.doGet("/api/services/"+svcID, nil)
+	defer detailResp.Body.Close()
+	assert.Equal(suite.T(), http.StatusOK, detailResp.StatusCode)
+
+	var svcResult dto.ServiceDetailResponse
+	suite.decodeResponse(detailResp.Body, &svcResult)
+	assert.True(suite.T(), svcResult.Success)
+	assert.Equal(suite.T(), svcID, svcResult.Data.ID)
+}
+
+func (suite *ServiceAPISearchIntegrationSuite) Test_GetServiceByID_NotFound() {
+	resp := suite.doGet("/api/services/not-existing-id", nil)
+	defer resp.Body.Close()
+	assert.Equal(suite.T(), http.StatusNotFound, resp.StatusCode)
+
+	var result dto.ServiceDetailResponse
+	suite.decodeResponse(resp.Body, &result)
+	assert.False(suite.T(), result.Success)
+	assert.NotEmpty(suite.T(), result.Errors)
+	assert.Equal(suite.T(), "service", result.Errors[0].Entity)
 }
 
 func (s *ServiceAPISearchIntegrationSuite) doGet(path string, headers map[string]string) *http.Response {
