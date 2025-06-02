@@ -7,4 +7,5 @@ import (
 
 type ServiceRepository interface {
 	Create(ctx context.Context, service *models.Service) error
+	Search(ctx context.Context, query string, page, limit int) ([]*models.Service, int, error)
 }

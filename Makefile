@@ -15,3 +15,7 @@ lint:
 
 setup-tools:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.2
+	go install github.com/vektra/mockery/v2@latest
+
+generate-mocks:
+	mockery --name=Client --dir=internal/opensearch --output=test/mocks/opensearch --outpkg=opensearch

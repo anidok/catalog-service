@@ -12,27 +12,27 @@ import (
 	"github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 )
 
-type ClientInterface interface {
+type Client interface {
 	IndexExists(indexName string) (bool, error)
 	IndexDocument(ctx context.Context, id string, document interface{}, indexName string) error
 	Search(ctx context.Context, indexName string, searchBody map[string]interface{}) ([]map[string]interface{}, int, error)
 }
 
-type Client struct {
+type ClientImpl struct {
 	client *opensearch.Client
 }
 
-func NewClient(addresses []string) (*Client, error) {
+func NewClient(addresses []string) (Client, error) {
 	client, err := opensearch.NewClient(opensearch.Config{
 		Addresses: addresses,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create OpenSearch client: %w", err)
 	}
-	return &Client{client: client}, nil
+	return &ClientImpl{client: client}, nil
 }
 
-func (c *Client) IndexExists(indexName string) (bool, error) {
+func (c *ClientImpl) IndexExists(indexName string) (bool, error) {
 	req := opensearchapi.IndicesExistsRequest{
 		Index: []string{indexName},
 	}
@@ -45,7 +45,7 @@ func (c *Client) IndexExists(indexName string) (bool, error) {
 	return res.StatusCode == http.StatusOK, nil
 }
 
-func (c *Client) IndexDocument(ctx context.Context, id string, document interface{}, indexName string) error {
+func (c *ClientImpl) IndexDocument(ctx context.Context, id string, document interface{}, indexName string) error {
 	log := logger.NewContextLogger(ctx, "Client/IndexDocument")
 
 	docJSON, err := json.Marshal(document)
@@ -80,7 +80,7 @@ func (c *Client) IndexDocument(ctx context.Context, id string, document interfac
 	return nil
 }
 
-func (c *Client) Search(ctx context.Context, indexName string, searchBody map[string]interface{}) ([]map[string]interface{}, int, error) {
+func (c *ClientImpl) Search(ctx context.Context, indexName string, searchBody map[string]interface{}) ([]map[string]interface{}, int, error) {
 	log := logger.NewContextLogger(ctx, "Client/Search")
 	searchBodyBytes, err := json.Marshal(searchBody)
 	if err != nil {

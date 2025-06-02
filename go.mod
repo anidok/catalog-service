@@ -4,7 +4,6 @@ go 1.24.0
 
 require (
 	github.com/go-chi/chi/v5 v5.2.1
-	github.com/google/uuid v1.6.0
 	github.com/opensearch-project/opensearch-go/v2 v2.3.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.20.1
@@ -22,6 +21,7 @@ require (
 	github.com/spf13/afero v1.12.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
