@@ -26,8 +26,16 @@ func Get() *AppConfig {
 	return cfg
 }
 
+func Port() int {
+	return cfg.GetOptionalIntValue("PORT", 4000)
+}
+
 func AppName() string {
 	return cfg.GetOptionalValue("APP_NAME", "catalog-service")
+}
+
+func AppEnv() string {
+	return cfg.GetOptionalValue("APP_ENV", "dev")
 }
 
 func LogLevel() string {

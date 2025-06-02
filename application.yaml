@@ -1,4 +1,6 @@
 APP_NAME: catalog-service
+APP_ENV: dev
+PORT: 4000
 SOME_INT_KEY: 42
 LOG_LEVEL: DEBUG
 OPENSEARCH_HOST_SERVERS: http://localhost:9200
