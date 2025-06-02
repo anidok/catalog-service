@@ -87,6 +87,52 @@ func (h *ServiceHandler) GetByID(c *gin.Context) {
 	buildSuccessDetailResponse(c, service)
 }
 
+func (h *ServiceHandler) Create(c *gin.Context) {
+	ctx := c.Request.Context()
+	log := logger.NewContextLogger(ctx, "ServiceHandler/Create")
+
+	var req dto.ServiceDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Errorf(err, "invalid request body")
+		c.JSON(http.StatusBadRequest, dto.ServiceDetailResponse{
+			Success: false,
+			Errors: []dto.ErrorObj{{
+				Code:   constants.Error_MALFORMED_DATA,
+				Entity: "service",
+				Cause:  "invalid request body",
+			}},
+		})
+		return
+	}
+
+	if errs, httpCode := validator.ValidateCreateRequest(&req); len(errs) > 0 {
+		c.JSON(httpCode, dto.ServiceDetailResponse{
+			Success: false,
+			Errors:  errs,
+		})
+		return
+	}
+
+	service, err := h.usecase.Create(ctx, &req)
+	if err != nil {
+		log.Errorf(err, "failed to create service")
+		c.JSON(http.StatusInternalServerError, dto.ServiceDetailResponse{
+			Success: false,
+			Errors: []dto.ErrorObj{{
+				Code:   "900",
+				Entity: "service",
+				Cause:  "failed to create service",
+			}},
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, dto.ServiceDetailResponse{
+		Success: true,
+		Data:    service,
+	})
+}
+
 func buildSuccessListResponse(c *gin.Context, services []*dto.ServiceDTO, total int, query string, page, limit int) {
 	c.JSON(http.StatusOK, dto.ServiceListResponse{
 		Success: true,

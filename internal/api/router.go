@@ -33,6 +33,7 @@ func NewRouter(repo repository.ServiceRepository) *gin.Engine {
 	{
 		api.GET("/services", serviceHandler.Search)
 		api.GET("/services/:id", serviceHandler.GetByID)
+		api.POST("/services", serviceHandler.Create)
 	}
 
 	return r

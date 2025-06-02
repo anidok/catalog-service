@@ -3,6 +3,7 @@ package usecase
 import (
 	"catalog-service/internal/constants"
 	"catalog-service/internal/dto"
+	"catalog-service/internal/models"
 	"catalog-service/internal/repository"
 	"context"
 )
@@ -10,6 +11,7 @@ import (
 type ServiceUsecase interface {
 	Search(ctx context.Context, query string, page, limit int) ([]*dto.ServiceDTO, int, error)
 	FindByID(ctx context.Context, id string) (*dto.ServiceDTO, error)
+	Create(ctx context.Context, req *dto.ServiceDTO) (*dto.ServiceDTO, error)
 }
 
 type serviceUsecase struct {
@@ -42,6 +44,26 @@ func (u *serviceUsecase) Search(ctx context.Context, query string, page, limit i
 func (u *serviceUsecase) FindByID(ctx context.Context, id string) (*dto.ServiceDTO, error) {
 	svc, err := u.repo.FindByID(ctx, id)
 	if err != nil {
+		return nil, err
+	}
+	return &dto.ServiceDTO{
+		ID:          svc.ID,
+		Name:        svc.Name,
+		Description: svc.Description,
+		Versions:    svc.Versions,
+		CreatedAt:   svc.CreatedAt.Format(constants.Iso8601Format),
+		UpdatedAt:   svc.UpdatedAt.Format(constants.Iso8601Format),
+	}, nil
+}
+
+func (u *serviceUsecase) Create(ctx context.Context, req *dto.ServiceDTO) (*dto.ServiceDTO, error) {
+	svc := &models.Service{
+		ID:          req.ID,
+		Name:        req.Name,
+		Description: req.Description,
+		Versions:    req.Versions,
+	}
+	if err := u.repo.Create(ctx, svc); err != nil {
 		return nil, err
 	}
 	return &dto.ServiceDTO{

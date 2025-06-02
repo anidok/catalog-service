@@ -2,9 +2,12 @@ package validator
 
 import (
 	"catalog-service/internal/constants"
+	"catalog-service/internal/dto"
+	"catalog-service/internal/models"
 	"net/http"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -62,4 +65,54 @@ func (suite *ServiceValidatorSuite) Test_ValidateSearchRequest_NonInt() {
 	suite.Equal(http.StatusBadRequest, code)
 	suite.Equal("page", errs[0].Entity)
 	suite.Equal("limit", errs[1].Entity)
+}
+
+func TestValidateCreateRequest_Valid(t *testing.T) {
+	req := &dto.ServiceDTO{
+		Name: "Test Service",
+		Versions: []models.Version{
+			{VersionNumber: "1.0", Details: "Initial"},
+		},
+	}
+	errs, code := ValidateCreateRequest(req)
+	assert.Empty(t, errs)
+	assert.Equal(t, 200, code)
+}
+
+func TestValidateCreateRequest_MissingName(t *testing.T) {
+	req := &dto.ServiceDTO{
+		Name: "",
+		Versions: []models.Version{
+			{VersionNumber: "1.0", Details: "Initial"},
+		},
+	}
+	errs, code := ValidateCreateRequest(req)
+	assert.Len(t, errs, 1)
+	assert.Equal(t, 400, code)
+	assert.Equal(t, "name", errs[0].Entity)
+}
+
+func TestValidateCreateRequest_MissingVersions(t *testing.T) {
+	req := &dto.ServiceDTO{
+		Name:     "Test Service",
+		Versions: []models.Version{},
+	}
+	errs, code := ValidateCreateRequest(req)
+	assert.Len(t, errs, 1)
+	assert.Equal(t, 400, code)
+	assert.Equal(t, "versions", errs[0].Entity)
+}
+
+func TestValidateCreateRequest_MissingVersionNumber(t *testing.T) {
+	req := &dto.ServiceDTO{
+		Name: "Test Service",
+		Versions: []models.Version{
+			{VersionNumber: "", Details: "Initial"},
+		},
+	}
+	errs, code := ValidateCreateRequest(req)
+	assert.Len(t, errs, 1)
+	assert.Equal(t, 400, code)
+	assert.Equal(t, "versions", errs[0].Entity)
+	assert.Contains(t, errs[0].Cause, "version_number is required")
 }
