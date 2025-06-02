@@ -19,24 +19,24 @@ type Client interface {
 }
 
 type ClientImpl struct {
-	client *opensearch.Client
+	*opensearch.Client
 }
 
-func NewClient(addresses []string) (Client, error) {
+func NewClient(addresses []string) (*ClientImpl, error) {
 	client, err := opensearch.NewClient(opensearch.Config{
 		Addresses: addresses,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create OpenSearch client: %w", err)
 	}
-	return &ClientImpl{client: client}, nil
+	return &ClientImpl{Client: client}, nil
 }
 
 func (c *ClientImpl) IndexExists(indexName string) (bool, error) {
 	req := opensearchapi.IndicesExistsRequest{
 		Index: []string{indexName},
 	}
-	res, err := req.Do(context.Background(), c.client)
+	res, err := req.Do(context.Background(), c.Client)
 	if err != nil {
 		return false, fmt.Errorf("failed to check index existence: %w", err)
 	}
@@ -61,7 +61,7 @@ func (c *ClientImpl) IndexDocument(ctx context.Context, id string, document inte
 		Refresh:    "true",
 	}
 
-	res, err := req.Do(ctx, c.client)
+	res, err := req.Do(ctx, c.Client)
 	if err != nil {
 		return fmt.Errorf("failed to index document: %w", err)
 	}
@@ -93,7 +93,7 @@ func (c *ClientImpl) Search(ctx context.Context, indexName string, searchBody ma
 		Body:  bytes.NewReader(searchBodyBytes),
 	}
 
-	res, err := req.Do(ctx, c.client)
+	res, err := req.Do(ctx, c.Client)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to execute search query: %w", err)
 	}

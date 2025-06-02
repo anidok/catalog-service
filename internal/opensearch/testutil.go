@@ -18,7 +18,7 @@ func (m *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return m.resp, m.err
 }
 
-func newMockClient(respBody map[string]interface{}, statusCode int) Client {
+func newMockClient(respBody map[string]interface{}, statusCode int) *ClientImpl {
 	body, _ := json.Marshal(respBody)
 	resp := &http.Response{
 		StatusCode: statusCode,
@@ -32,7 +32,7 @@ func newMockClient(respBody map[string]interface{}, statusCode int) Client {
 		Addresses: []string{"http://mock:9200"},
 		Transport: httpClient.Transport,
 	})
-	return &ClientImpl{client: osClient}
+	return &ClientImpl{Client: osClient}
 }
 
 func unmarshalJSON(jsonStr string) map[string]interface{} {

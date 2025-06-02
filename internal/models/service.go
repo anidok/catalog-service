@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 type Service struct {
@@ -10,6 +11,8 @@ type Service struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Versions    []Version `json:"versions"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type Version struct {

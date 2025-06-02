@@ -60,14 +60,9 @@ func processFile(ctx context.Context, filePath string, repo repository.ServiceRe
 
 	scanner := bufio.NewScanner(file)
 	var count int
-
-	for lineNum := 1; scanner.Scan(); lineNum++ {
-		line := scanner.Bytes()
-		if len(line) == 0 {
-			continue
-		}
-
-		if err := processLine(ctx, line, lineNum, repo); err != nil {
+	for scanner.Scan() {
+		if err := processLine(ctx, scanner.Bytes(), count+1, repo); err != nil {
+			logger.NonContext.Errorf(err, "Failed to process line %d: %v", count+1, err)
 			continue
 		}
 		count++
@@ -80,17 +75,25 @@ func processFile(ctx context.Context, filePath string, repo repository.ServiceRe
 }
 
 func processLine(ctx context.Context, line []byte, lineNum int, repo repository.ServiceRepository) error {
+	if len(line) == 0 {
+		return nil
+	}
+
 	var service models.Service
 	if err := json.Unmarshal(line, &service); err != nil {
-		logger.NonContext.Errorf(err, "failed to unmarshal service JSON from line %d", lineNum)
 		return err
 	}
+
+	now := time.Now().UTC()
+	if service.CreatedAt.IsZero() {
+		service.CreatedAt = now
+	}
+	service.UpdatedAt = now
 
 	if err := repo.Create(ctx, &service); err != nil {
-		logger.NonContext.Errorf(err, "failed to index service from line %d", lineNum)
 		return err
 	}
 
-	logger.NonContext.Infof("successfully indexed service from line %d", lineNum)
+	logger.NonContext.Infof("Successfully indexed service from line %d", lineNum)
 	return nil
 }

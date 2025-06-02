@@ -19,3 +19,13 @@ setup-tools:
 
 generate-mocks:
 	mockery --name=Client --dir=internal/opensearch --output=test/mocks/opensearch --outpkg=opensearch
+
+migrate:
+	curl -X DELETE "http://localhost:9200/services"
+	go run cmd/migrate/main.go
+
+ingest:
+	go run cmd/ingest/main.go
+
+migrate-ingest: migrate ingest
+all: fmt test lint setup-tools generate-mocks migrate-ingest
