@@ -18,6 +18,7 @@ type Client interface {
 	IndexExists(indexName string) (bool, error)
 	IndexDocument(ctx context.Context, id string, document interface{}, indexName string) error
 	Search(ctx context.Context, indexName string, searchBody map[string]interface{}) ([]map[string]interface{}, int, error)
+	FindDocumentByID(ctx context.Context, indexName, id string) (map[string]interface{}, error)
 }
 
 type ClientImpl struct {
@@ -144,4 +145,34 @@ func (c *ClientImpl) Search(ctx context.Context, indexName string, searchBody ma
 	}
 
 	return hits, total, nil
+}
+
+func (c *ClientImpl) FindDocumentByID(ctx context.Context, indexName, id string) (map[string]interface{}, error) {
+	log := logger.NewContextLogger(ctx, "Client/FindDocumentByID")
+	req := opensearchapi.GetRequest{
+		Index:      indexName,
+		DocumentID: id,
+	}
+	log.Debugf("getting document by id: %s from index: %s", id, indexName)
+	res, err := req.Do(ctx, c.Client)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get document by id: %w", err)
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		return nil, fmt.Errorf("error getting document by id: %s", res.String())
+	}
+
+	var getResp struct {
+		Found  bool                   `json:"found"`
+		Source map[string]interface{} `json:"_source"`
+	}
+	if err := json.NewDecoder(res.Body).Decode(&getResp); err != nil {
+		return nil, fmt.Errorf("failed to decode get response: %w", err)
+	}
+	if !getResp.Found {
+		return nil, fmt.Errorf("document not found")
+	}
+	return getResp.Source, nil
 }

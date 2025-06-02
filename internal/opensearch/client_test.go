@@ -12,6 +12,8 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+const TestIndexName = "test-index"
+
 type ClientTestSuite struct {
 	suite.Suite
 }
@@ -28,7 +30,7 @@ func (suite *ClientTestSuite) SetupTest() {
 func (suite *ClientTestSuite) Test_IndexExists_ReturnsTrueWhenStatusOK() {
 	client := newMockClient(nil, http.StatusOK)
 
-	exists, err := client.IndexExists("test-index")
+	exists, err := client.IndexExists(TestIndexName)
 
 	assert.NoError(suite.T(), err)
 	assert.True(suite.T(), exists)
@@ -37,7 +39,7 @@ func (suite *ClientTestSuite) Test_IndexExists_ReturnsTrueWhenStatusOK() {
 func (suite *ClientTestSuite) Test_IndexExists_ReturnsFalseWhenNotFound() {
 	client := newMockClient(nil, http.StatusNotFound)
 
-	exists, err := client.IndexExists("test-index")
+	exists, err := client.IndexExists(TestIndexName)
 
 	assert.NoError(suite.T(), err)
 	assert.False(suite.T(), exists)
@@ -50,7 +52,7 @@ func (suite *ClientTestSuite) Test_IndexDocument_SuccessfulIndexing() {
 	}`
 	client := newMockClient(unmarshalJSON(body), http.StatusCreated)
 
-	err := client.IndexDocument(context.Background(), "doc123", map[string]string{"foo": "bar"}, "test-index")
+	err := client.IndexDocument(context.Background(), "doc123", map[string]string{"foo": "bar"}, TestIndexName)
 
 	assert.NoError(suite.T(), err)
 }
@@ -61,7 +63,7 @@ func (suite *ClientTestSuite) Test_IndexDocument_FailureOnBadRequest() {
 	}`
 	client := newMockClient(unmarshalJSON(body), http.StatusBadRequest)
 
-	err := client.IndexDocument(context.Background(), "doc123", map[string]string{"foo": "bar"}, "test-index")
+	err := client.IndexDocument(context.Background(), "doc123", map[string]string{"foo": "bar"}, TestIndexName)
 
 	assert.Error(suite.T(), err)
 }
@@ -115,4 +117,31 @@ func (suite *ClientTestSuite) Test_Search_Error() {
 	assert.Error(suite.T(), err)
 	assert.Nil(suite.T(), hits)
 	assert.Equal(suite.T(), 0, total)
+}
+
+func (suite *ClientTestSuite) Test_FindDocumentByID_Success() {
+	body := `{
+		"found": true,
+		"_source": {
+			"id": "finddoc-id",
+			"name": "FindDoc",
+			"description": "FindDoc Desc"
+		}
+	}`
+	client := newMockClient(unmarshalJSON(body), http.StatusOK)
+	ctx := context.Background()
+	found, err := client.FindDocumentByID(ctx, TestIndexName, "finddoc-id")
+	assert.NoError(suite.T(), err)
+	assert.NotNil(suite.T(), found)
+	assert.Equal(suite.T(), "FindDoc", found["name"])
+}
+
+func (suite *ClientTestSuite) Test_FindDocumentByID_NotFound() {
+	body := `{
+		"found": false
+	}`
+	client := newMockClient(unmarshalJSON(body), http.StatusOK)
+	ctx := context.Background()
+	_, err := client.FindDocumentByID(ctx, TestIndexName, "not-exist-id")
+	assert.Error(suite.T(), err)
 }

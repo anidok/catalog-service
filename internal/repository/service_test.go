@@ -3,9 +3,11 @@ package repository
 import (
 	"context"
 	"testing"
+	"time"
 
 	"catalog-service/internal/config"
 	"catalog-service/internal/logger"
+	"catalog-service/internal/models"
 	opensearchmock "catalog-service/test/mocks/opensearch"
 
 	"github.com/stretchr/testify/assert"
@@ -63,4 +65,47 @@ func (suite *ServiceRepoTestSuite) Test_Search_Error() {
 	assert.Error(suite.T(), err)
 	assert.Nil(suite.T(), services)
 	assert.Equal(suite.T(), 0, total)
+}
+
+func (suite *ServiceRepoTestSuite) Test_FindByID_Success() {
+	mockClient := new(opensearchmock.Client)
+	ctx := context.Background()
+	svc := &models.Service{
+		ID:          "test-find-id",
+		Name:        "FindByID Service",
+		Description: "Test FindByID",
+		Versions:    []models.Version{{VersionNumber: "1.0", Details: "Initial"}},
+		CreatedAt:   time.Now().UTC(),
+		UpdatedAt:   time.Now().UTC(),
+	}
+	mockClient.On("FindDocumentByID", mock.Anything, "services", "test-find-id").Return(
+		map[string]interface{}{
+			"id":          svc.ID,
+			"name":        svc.Name,
+			"description": svc.Description,
+			"versions":    []map[string]interface{}{{"VersionNumber": "1.0", "Details": "Initial"}},
+			"created_at":  svc.CreatedAt,
+			"updated_at":  svc.UpdatedAt,
+		}, nil,
+	)
+
+	repo := &ServiceRepositoryImpl{Client: mockClient}
+
+	found, err := repo.FindByID(ctx, "test-find-id")
+	assert.NoError(suite.T(), err)
+	assert.NotNil(suite.T(), found)
+	assert.Equal(suite.T(), svc.ID, found.ID)
+	assert.Equal(suite.T(), svc.Name, found.Name)
+	assert.Equal(suite.T(), svc.Description, found.Description)
+}
+
+func (suite *ServiceRepoTestSuite) Test_FindByID_NotFound() {
+	mockClient := new(opensearchmock.Client)
+	ctx := context.Background()
+	mockClient.On("FindDocumentByID", mock.Anything, "services", "does-not-exist-id").Return(nil, assert.AnError)
+
+	repo := &ServiceRepositoryImpl{Client: mockClient}
+
+	_, err := repo.FindByID(ctx, "does-not-exist-id")
+	assert.Error(suite.T(), err)
 }

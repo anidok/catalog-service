@@ -13,6 +13,36 @@ type Client struct {
 	mock.Mock
 }
 
+// FindDocumentByID provides a mock function with given fields: ctx, indexName, id
+func (_m *Client) FindDocumentByID(ctx context.Context, indexName string, id string) (map[string]interface{}, error) {
+	ret := _m.Called(ctx, indexName, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindDocumentByID")
+	}
+
+	var r0 map[string]interface{}
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (map[string]interface{}, error)); ok {
+		return rf(ctx, indexName, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) map[string]interface{}); ok {
+		r0 = rf(ctx, indexName, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[string]interface{})
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, indexName, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // IndexDocument provides a mock function with given fields: ctx, id, document, indexName
 func (_m *Client) IndexDocument(ctx context.Context, id string, document interface{}, indexName string) error {
 	ret := _m.Called(ctx, id, document, indexName)

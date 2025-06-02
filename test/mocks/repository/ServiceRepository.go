@@ -32,6 +32,36 @@ func (_m *ServiceRepository) Create(ctx context.Context, service *models.Service
 	return r0
 }
 
+// FindByID provides a mock function with given fields: ctx, id
+func (_m *ServiceRepository) FindByID(ctx context.Context, id string) (*models.Service, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindByID")
+	}
+
+	var r0 *models.Service
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*models.Service, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *models.Service); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Service)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Search provides a mock function with given fields: ctx, query, page, limit
 func (_m *ServiceRepository) Search(ctx context.Context, query string, page int, limit int) ([]*models.Service, int, error) {
 	ret := _m.Called(ctx, query, page, limit)

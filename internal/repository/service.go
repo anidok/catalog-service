@@ -65,6 +65,22 @@ func (r *ServiceRepositoryImpl) Search(ctx context.Context, query string, page, 
 	return services, total, nil
 }
 
+func (r *ServiceRepositoryImpl) FindByID(ctx context.Context, id string) (*models.Service, error) {
+	log := logger.NewContextLogger(ctx, "ServiceRepositoryImpl/FindByID")
+	doc, err := r.Client.FindDocumentByID(ctx, ServiceIndexName, id)
+	if err != nil {
+		log.Errorf(err, "failed to find document by id")
+		return nil, err
+	}
+	var svc models.Service
+	b, _ := json.Marshal(doc)
+	if err := json.Unmarshal(b, &svc); err != nil {
+		log.Errorf(err, "failed to unmarshal document to Service")
+		return nil, err
+	}
+	return &svc, nil
+}
+
 func (r *ServiceRepositoryImpl) prepareService(service *models.Service) error {
 	if service == nil {
 		return fmt.Errorf("service cannot be nil")
