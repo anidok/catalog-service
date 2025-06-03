@@ -48,3 +48,13 @@ deps:
 	go mod tidy
 	go mod vendor
 
+jwt-generate:
+	go run cmd/jwt/main.go
+
+jwt-verify:
+	@if [ -z "$(token)" ]; then \
+		echo "Usage: make jwt-verify token=<jwt-token>"; \
+		exit 1; \
+	fi; \
+	go run cmd/jwt/main.go verify $(token)
+

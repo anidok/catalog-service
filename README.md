@@ -203,20 +203,14 @@ Kong runs on port **8000** (proxy) and **8001** (admin).
 ---
 
 ## Using JWT Authentication
-1. **Install the required Node.js dependencies:**
+1. **Generate a JWT token:**
    ```sh
-   npm init -y
-   npm install jsonwebtoken
-   ```
-
-2. **Generate a JWT token:**
-   ```sh
-   node generate-jwt.js generate
+   make jwt-generate
    ```
    
-3. **Verify a token:**
+2. **Verify a token:**
    ```sh
-   node generate-jwt.js verify <your-token>
+   make jwt-verify token=<your-token>
    ```
    
 #### Example cURL with JWT
