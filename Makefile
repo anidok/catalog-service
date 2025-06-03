@@ -58,3 +58,16 @@ jwt-verify:
 	fi; \
 	go run cmd/jwt/main.go verify $(token)
 
+run: deps prepare run-api
+
+compose-up:
+	docker compose up -d
+
+compose-down:
+	docker compose down
+
+compose-up-kong:
+	docker-compose -f docker-compose-kong.yml up --build -d
+
+compose-down-kong:
+	docker-compose -f docker-compose-kong.yml down

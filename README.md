@@ -7,104 +7,27 @@ A Go-based REST API for managing catalog services, supporting search, create, up
 ## Prerequisites
 
 - **Go 1.24** or higher
-- Docker (for running OpenSearch via Docker Compose).
+- **Docker** (for running OpenSearch via Docker Compose).
 
 ---
 
 ## Setup
-
-1. **Clone the repository**
-   ```sh
-   git clone https://github.com/anidok/catalog-service.git
-   cd catalog-service
-   ```
-
-2. **Configuration**
-   - Edit `application.yaml` for environment-specific settings (OpenSearch host, ports, etc).
-
-3. **Dependencies**
-   - Install Go modules:
+Follow this section to run app on your local.
+1. **Run OpenSearch**
+   - Run docker compose:
      ```sh
-     make deps
+     make compose-up
      ```
+     Wait for a few seconds for opensearch to setup. Check if opensearch dashboard is accessible at  http://localhost:5601
 
-4. **Generate Mocks (for unit tests)**
-   - If you change interfaces or want to regenerate mocks:
+2. **Run Application**
      ```sh
-     make generate-mocks
+     make run
      ```
-
-5. **Linting**
-   - To check code quality and style:
-     ```sh
-     make lint
-     ```
-
----
-
-## Running OpenSearch (Docker Compose)
-
-For integration tests and local development, use Docker Compose:
-
-```sh
-docker-compose up -d
-```
-
-- OpenSearch will be available on port **9200**.
-- The OpenSearch Dashboard will be accessible at [http://localhost:5601](http://localhost:5601).Wait for a few seconds for the dashboard to load.
-
----
-
-## Database Migration
-
-Apply DB/index migrations:
-
-```sh
-make migrate
-```
-
----
-
-## Initial Data Ingestion
-
-Load initial test data into OpenSearch:
-
-```sh
-make ingest
-```
-
----
-
-## Running Application
-
-  ```sh
-  make run-api
-  ```
-
----
-
-## Running Tests
-
-- **Unit Tests**
-  ```sh
-  make unit-test
-  ```
-
-- **Integration Tests** (requires OpenSearch running)
-  ```sh
-  make integration-test
-  ```
-
+     The API server will be accessible at port 4000.
 ---
 
 ## API Endpoints & Sample cURL
-
-### Get Service by ID
-
-```sh
-curl -X GET "http://localhost:4000/api/services/<id>" \
-  -H "X-Correlation-ID: test-corr-id"
-```
 
 ### Search Services
 
@@ -141,6 +64,12 @@ curl -X GET "http://localhost:4000/api/services?q=Forex%20Card" \
 #### 6. With search query not matching anything
 ```sh
 curl -X GET "http://localhost:4000/api/services?q=nonexistentquery" \
+  -H "X-Correlation-ID: test-corr-id"
+```
+### Get Service by ID
+
+```sh
+curl -X GET "http://localhost:4000/api/services/<id>" \
   -H "X-Correlation-ID: test-corr-id"
 ```
 
@@ -182,8 +111,6 @@ curl -X DELETE "http://localhost:4000/api/services/<id>" \
 
 ---
 
-
-
 ## Authentication/Authorization Using Kong API Gateway
 Kong is used for authentication and authorization (JWT + ACL).  
 Kong runs on port **8000** (proxy) and **8001** (admin).  
@@ -192,23 +119,20 @@ Kong runs on port **8000** (proxy) and **8001** (admin).
 
 1. **Scale down previous docker compose**
    ```sh
-   docker-compose down
+   make compose-down
    ```
 
-2. **Scale up**
-   - Scale up new compose file containing images for application and kong
+2. **Scale up new compose file containing images for application and kong**
    ```sh
-   docker-compose -f docker-compose-kong.yml up --build -d
+   make compose-up-kong
    ```
----
-
-## Using JWT Authentication
-1. **Generate a JWT token:**
+   
+3. **Generate a JWT token:**
    ```sh
    make jwt-generate
    ```
    
-2. **Verify a token:**
+2. **Verify a token (Optional):**
    ```sh
    make jwt-verify token=<your-token>
    ```
@@ -234,9 +158,52 @@ You can generate a JWT token for testing using the secret above.
 
 #### Scale down
 ```sh
-docker-compose -f docker-compose-kong.yml down
+make compose-down-kong
 ```
 ---
+
+
+## Running OpenSearch (Docker Compose)
+
+For integration tests and local development, use Docker Compose:
+
+```sh
+docker-compose up -d
+```
+
+- OpenSearch will be available on port **9200**.
+- The OpenSearch Dashboard will be accessible at [http://localhost:5601](http://localhost:5601).Wait for a few seconds for the dashboard to load.
+
+---
+
+## Running Tests
+
+- **Unit Tests**
+    - Generate Mocks
+        ```sh
+        make generate-mocks
+        ```
+    - Run unit tests
+        ```sh
+        make unit-test
+        ```
+
+- **Integration Tests** (requires OpenSearch running)
+  ```sh
+  make integration-test
+  ```
+
+---
+
+## Running Linter
+
+- **To check code quality and style**
+
+        make lint
+
+---
+
+
 
 ## Design Considerations & Trade-offs
 
