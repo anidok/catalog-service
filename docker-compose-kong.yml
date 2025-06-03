@@ -1,4 +1,4 @@
-version: '3'
+version: "3.8"
 services:
   opensearch:
     image: opensearchproject/opensearch:latest
@@ -36,5 +36,35 @@ services:
       - 'OPENSEARCH_HOSTS=["http://opensearch-node:9200"]'
       - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true"
 
+
+  kong:
+    image: kong:3.3
+    environment:
+      KONG_DATABASE: "off"
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_DECLARATIVE_CONFIG: /usr/local/kong/declarative/kong.yml
+    volumes:
+      - ./kong.yml:/usr/local/kong/declarative/kong.yml
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+
+  catalog-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - APP_ENV=dev
+      - PORT=4000
+      - OPENSEARCH_HOST_SERVERS=http://opensearch-node:9200
+    ports:
+      - "4000:4000"
+    depends_on:
+      - opensearch
+
 volumes:
-  opensearch-data: 
+  opensearch-data:

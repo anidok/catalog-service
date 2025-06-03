@@ -1,0 +1,32 @@
+_format_version: "3.0"
+
+services:
+  - name: catalog-service
+    url: http://catalog-service:4000
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: iss
+          claims_to_verify:
+            - exp
+      - name: acl
+        config:
+          allow: ["catalog-group"]
+    routes:
+      - name: catalog-route
+        paths:
+          - ~/api/
+        strip_path: false
+
+consumers:
+  - username: jwt-user
+    custom_id: user123
+
+acls:
+  - consumer: jwt-user
+    group: catalog-group
+
+jwt_secrets:
+  - consumer: jwt-user
+    key: kong-jwt-auth
+    secret: some-key

@@ -6,7 +6,7 @@ A Go-based REST API for managing catalog services, supporting search, create, up
 
 ## Prerequisites
 
-- **Go 1.24**
+- **Go 1.24** or higher
 - Docker (for running OpenSearch via Docker Compose).
 
 ---
@@ -182,6 +182,68 @@ curl -X DELETE "http://localhost:4000/api/services/<id>" \
 
 ---
 
+
+
+## Authentication/Authorization Using Kong API Gateway
+Kong is used for authentication and authorization (JWT + ACL).  
+Kong runs on port **8000** (proxy) and **8001** (admin).  
+
+### Start all services (including Kong):
+
+1. **Scale down previous docker compose**
+   ```sh
+   docker-compose down
+   ```
+
+2. **Scale up**
+   - Scale up new compose file containing images for application and kong
+   ```sh
+   docker-compose -f docker-compose-kong.yml up --build -d
+   ```
+---
+
+## Using JWT Authentication
+1. **Install the required Node.js dependencies:**
+   ```sh
+   npm init -y
+   npm install jsonwebtoken
+   ```
+
+2. **Generate a JWT token:**
+   ```sh
+   node generate-jwt.js generate
+   ```
+   
+3. **Verify a token:**
+   ```sh
+   node generate-jwt.js verify <your-token>
+   ```
+   
+#### Example cURL with JWT
+
+```sh
+curl -X GET "http://localhost:8000/api/services" \
+  -H "X-Correlation-ID: test-corr-id" \
+  -H "Authorization: Bearer <your-jwt-token>"
+```
+
+#### Kong JWT Auth
+
+- All `/api/*` endpoints are protected by JWT and ACL.
+- Use the following JWT secret for testing:
+  - **key:** `kong-jwt-auth`
+  - **secret:** `some-key`
+  - **consumer:** `jwt-user`
+  - **group:** `catalog-group`
+
+You can generate a JWT token for testing using the secret above.
+
+#### Scale down
+```sh
+docker-compose -f docker-compose-kong.yml down
+```
+---
+
 ## Design Considerations & Trade-offs
 
 - **OpenSearch as Backend:**  
@@ -224,10 +286,11 @@ curl -X DELETE "http://localhost:4000/api/services/<id>" \
 ---
 
 ## Notes
-
 - Make sure OpenSearch is running before running integration tests or ingesting data.
 - Use the provided Makefile targets for common tasks.
 - See `testdata/services.json` for example data used in tests.
 - See `data.jsonl` for example data used for initial ingestion.
+- Kong will block requests without a valid JWT and proper ACL group.
+- All other API usage remains the same, just add the JWT header.
 
 ---
