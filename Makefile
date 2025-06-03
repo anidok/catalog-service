@@ -44,7 +44,7 @@ run-api:
 	go run cmd/api/main.go
 
 deps:
-	go mod tidy
 	go mod download
+	go mod tidy
 	go mod vendor
 
