@@ -51,7 +51,7 @@ docker-compose up -d
 ```
 
 - OpenSearch will be available on port **9200**.
-- The OpenSearch Dashboard will be accessible at [http://localhost:5601](http://localhost:5601).
+- The OpenSearch Dashboard will be accessible at [http://localhost:5601](http://localhost:5601).Wait for a few seconds for the dashboard to load.
 
 ---
 
