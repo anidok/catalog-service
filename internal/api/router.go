@@ -24,6 +24,7 @@ func NewRouter(repo repository.ServiceRepository) *gin.Engine {
 	}
 
 	r := gin.Default()
+	r.Use(middleware.PanicRecoveryMiddleware()) // <-- Add panic recovery middleware
 	r.Use(middleware.CorrelationIDMiddleware())
 
 	serviceUsecase := usecase.NewServiceUsecase(repo)
