@@ -178,6 +178,12 @@ docker-compose up -d
 
 ## Running Tests
 
+- **Setup**
+    - Install mockery & golangci 
+        ```sh
+        make setup-tools
+        ```
+
 - **Unit Tests**
     - Generate Mocks
         ```sh
