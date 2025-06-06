@@ -179,9 +179,9 @@ docker-compose up -d
 ## Running Tests
 
 - **Setup**
-    - Install mockery & golangci 
+    - Install mockery (Optional, unless you're changing interfaced and want to regenerate mocks)
         ```sh
-        make setup-tools
+        make install-mockery
         ```
 
 - **Unit Tests**
@@ -203,10 +203,15 @@ docker-compose up -d
 
 ## Running Linter
 
+- **Install golangci-lint**
+  ```sh
+  make install-golangci-lint
+  ```
+  
 - **To check code quality and style**
-
-        make lint
-
+    ```sh
+    make lint
+    ```
 ---
 
 
