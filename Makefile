@@ -49,7 +49,7 @@ deps:
 	go mod vendor
 
 jwt-generate:
-	go run cmd/jwt/main.go
+	go run cmd/jwt/main.go generate
 
 jwt-verify:
 	@if [ -z "$(token)" ]; then \
@@ -67,7 +67,7 @@ compose-down:
 	docker compose down
 
 compose-up-kong:
-	docker-compose -f docker-compose-kong.yml up --build -d
+	docker compose -f docker-compose-kong.yml up --build -d
 
 compose-down-kong:
-	docker-compose -f docker-compose-kong.yml down
+	docker compose -f docker-compose-kong.yml down
